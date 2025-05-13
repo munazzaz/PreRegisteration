@@ -240,7 +240,7 @@ export default function SignupPage() {
                 id="contact"
                 name="contact"
                 type="text"
-                placeholder="e.g. 1234567890"
+                placeholder="e.g. 202 555-0198"
                 className="w-full rounded-full bg-white ring-1 ring-gray-200 px-6 py-3 placeholder-[#000000] focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
                 value={form.contact}
                 onChange={handleChange}
@@ -291,7 +291,7 @@ export default function SignupPage() {
                 id="zip"
                 name="zip"
                 type="text"
-                placeholder="e.g. 12345"
+                placeholder="e.g. 73301"
                 maxLength={5}
                 className="w-full rounded-full bg-white ring-1 ring-gray-200 px-6 py-3 placeholder-[#000000] focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
                 value={form.zip}
