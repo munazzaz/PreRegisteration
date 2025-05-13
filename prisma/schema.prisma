@@ -6,6 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "node_modules/@prisma/client"
 }
 
 datasource db {
@@ -14,14 +15,18 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+
 model PreRegistration {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  city      String?
-  zip       String?
-  role      Role
-  createdAt DateTime @default(now())
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  city         String
+  zip          String?
+  role         Role
+  businessName String
+  contact      String
+  state        String
+  createdAt    DateTime @default(now())
 }
 
 enum Role {

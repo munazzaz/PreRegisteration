@@ -4,7 +4,7 @@ import HeroSection from './components/HeroSection';
 
 const HomePage: React.FC = () => {
   return (
-    <main className="max-w-screen-2xl mx-auto min-h-screen bg-gradient-to-b from-gray-50 to-white flex flex-col items-center px-4">
+    <main className="max-w-screen-2xl mx-auto min-h-screen bg-gradient-to-b from-gray-50 to-white flex flex-col items-center sm:px-4 ">
      <PreRegHeader />
       <HeroSection />
 

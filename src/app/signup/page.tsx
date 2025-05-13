@@ -4,13 +4,16 @@ import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Vendor from "./../../../public/images/vendor.png"
-
+import ResponsiveSignupPage from "./../components/ResponsiveSignupPage"
 type FormState = {
   name: string
   email: string
   city: string
   zip: string
   role: 'VENDOR' | 'SUPPORTER'
+  businessName: string
+  contact: string
+  state: string
 }
 
 type FieldErrors = Partial<Record<keyof FormState, string>>
@@ -18,9 +21,12 @@ type FieldErrors = Partial<Record<keyof FormState, string>>
 type FieldName = keyof FormState
 
 function validateField(name: FieldName, value: string): string | undefined {
+  const v = value.trim()
   switch (name) {
     case 'name':
-      if (!value.trim()) return 'Name is required.'
+      if (!v) return 'Name is required.'
+      if (v.length < 3) return 'Name must be at least 3 characters.'
+      if (v.length > 70) return 'Name must be at most 70 characters.'
       break
 
     case 'email':
@@ -29,7 +35,9 @@ function validateField(name: FieldName, value: string): string | undefined {
       break
 
     case 'city':
-      if (!value.trim()) return 'City is required.'
+      if (!v) return 'City is required.'
+      if (v.length < 3) return 'City must be at least 3 characters.'
+      if (v.length > 70) return 'City must be at most 70 characters.'
       break
 
     case 'zip':
@@ -42,6 +50,48 @@ function validateField(name: FieldName, value: string): string | undefined {
     case 'role':
       if (!value) return 'Please select a role.'
       break
+
+    case 'businessName':
+      const name = value.trim();
+      if (!name) {
+        return 'Business Name is required.';
+      }
+      if (name.length < 3) {
+        return 'Business Name must be at least 3 characters.';
+      }
+      if (name.length > 100) {
+        return 'Business Name must be at most 100 characters.';
+      }
+      break
+
+
+    case 'contact': {
+      if (!value.trim()) {
+        return 'Contact Information is required.'
+      }
+    
+      // Remove everything except digits
+      const digits = value.replace(/\D/g, '')
+    
+      // Must be exactly 10 digits
+      if (digits.length !== 10) {
+        return 'Contact must be a valid 10-digit U.S. phone number.'
+      }
+    
+    
+      const visRegex = /^(?:\(\d{3}\)\s?|\d{3}[-\s]?)\d{3}[-\s]?\d{4}$/
+      if (!visRegex.test(value)) {
+        return 'Contact must be in a valid U.S. format (e.g. 123-456-7890).'
+      }
+    
+      break
+    }
+
+    case 'state':
+      if (!v) return 'State is required.'
+      if (v.length < 3) return 'State must be at least 3 characters.'
+      if (v.length > 70) return 'State must be at most 70 characters.'
+      break
   }
   return undefined
 }
@@ -51,7 +101,7 @@ function validateForm(form: FormState): FieldErrors {
   for (const key in form) {
     const field = key as FieldName
     const error = validateField(field, form[field])
-    if (error) errs[field] = error
+    if (error) errs[field] = error 
   }
   return errs
 }
@@ -65,6 +115,9 @@ export default function SignupPage() {
     city: '',
     zip: '',
     role: 'VENDOR',
+    businessName: '',
+    contact: '',
+    state: '',
   })
   const [errors, setErrors] = useState<FieldErrors>({})
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
@@ -107,11 +160,14 @@ export default function SignupPage() {
     }
   }
 
-
   return (
+    <div>
+    <div className='hidden lg:block'>
     <div className="min-h-screen flex flex-col lg:flex-row items-stretch">
-      <div className="w-full lg:w-1/2 bg-white flex items-start px-10 py-10 h-full pb-32">
+
+      <div className="w-full lg:w-1/2 bg-white flex justify-center lg:justify-start px-10 py-10 h-full pb-32">
         <div className="w-full max-w-md">
+          
           <Image
             src="/images/logo.png"
             alt="Beiz Logo"
@@ -119,9 +175,9 @@ export default function SignupPage() {
             height={89}
             className="mb-8"
           />
-          <h1 className='text-[33px] font-bold text-[#232323] pt-8 px-10'>Pre-register Your Spot</h1>
-          <p className='font-light text-[16px] mt-1 text-[#1C1C1C] px-10'>Welcome! Please enter your details.</p>
-          <form onSubmit={handleSubmit} noValidate className="space-y-6 mt-10 px-10">
+          <h1 className='text-[33px] font-bold text-[#232323] pt-8  xl:px-10 px-8'>Pre-register Your Spot</h1>
+          <p className='font-light text-[16px] lg:mt-1 text-[#1C1C1C] xl:px-10 px-8'>Welcome! Please enter your details.</p>
+          <form onSubmit={handleSubmit} noValidate className="space-y-6 mt-10 xl:px-10 px-8">
             {status === 'error' && errorMsg && (
               <p className="text-red-600 text-sm">{errorMsg}</p>
             )}
@@ -138,6 +194,7 @@ export default function SignupPage() {
                 className="w-full rounded-full bg-white ring-1 ring-gray-200 px-6 py-3 placeholder-[#000000] focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
                 value={form.name}
                 onChange={handleChange}
+                maxLength={70}
               />
               {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
             </div>
@@ -157,6 +214,56 @@ export default function SignupPage() {
               />
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
             </div>
+            {/* Business Name */}
+            <div>
+              <label htmlFor="businessName" className="block text-sm font-light text-[#36454F] mb-2 px-5">
+                Business Name
+              </label>
+              <input
+                id="businessName"
+                name="businessName"
+                type="text"
+                placeholder="Enter your business name"
+                className="w-full rounded-full bg-white ring-1 ring-gray-200 px-6 py-3 placeholder-[#000000] focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+                value={form.businessName}
+                onChange={handleChange}
+                maxLength={100}
+              />
+              {errors.businessName && <p className="text-red-500 text-xs mt-1">{errors.businessName}</p>}
+            </div>
+            {/* Contact Information */}
+            <div>
+              <label htmlFor="contact" className="block text-sm font-light text-[#36454F] mb-2 px-5">
+                Contact Information / Cell Phone Number
+              </label>
+              <input
+                id="contact"
+                name="contact"
+                type="text"
+                placeholder="e.g. 1234567890"
+                className="w-full rounded-full bg-white ring-1 ring-gray-200 px-6 py-3 placeholder-[#000000] focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+                value={form.contact}
+                onChange={handleChange}
+              />
+              {errors.contact && <p className="text-red-500 text-xs mt-1">{errors.contact}</p>}
+            </div>
+            {/* State */}
+            <div>
+              <label htmlFor="state" className="block text-sm font-light text-[#36454F] mb-2 px-5">
+                State
+              </label>
+              <input
+                id="state"
+                name="state"
+                type="text"
+                placeholder="Enter your state"
+                className="w-full rounded-full bg-white ring-1 ring-gray-200 px-6 py-3 placeholder-[#000000] focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+                value={form.state}
+                onChange={handleChange}
+                maxLength={70}
+              />
+              {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state}</p>}
+            </div>
             {/* City */}
             <div>
               <label htmlFor="city" className="block text-sm font-light text-[#36454F] mb-2 px-5">
@@ -170,6 +277,8 @@ export default function SignupPage() {
                 className="w-full rounded-full bg-white ring-1 ring-gray-200 px-6 py-3 placeholder-[#000000] focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
                 value={form.city}
                 onChange={handleChange}
+                maxLength={70}
+
               />
               {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
             </div>
@@ -222,7 +331,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={status === 'submitting'}
-              className="mt-4 w-full rounded-full bg-[#D4AF37] text-white py-3 font-semibold hover:bg-[#E5C96B] transition disabled:opacity-50 "
+              className="mt-4 w-full rounded-full bg-[#D4AF37] text-white py-3 font-semibold transition disabled:opacity-50 "
             >
               {status === 'submitting' ? 'Submitting…' : 'Pre-Register'}
             </button>
@@ -230,14 +339,17 @@ export default function SignupPage() {
         </div>
       </div>
 
-      <div className="w-full lg:w-1/2 relative  overflow-hidden">
+      <div className="w-full lg:w-1/2 relative overflow-hidden min-h-screen">
         <Image
           src={Vendor}
           alt="Vendor"
-          className="absolute top-0 left-0 object-cover w-full h-full" />
+          fill
+          className="aabsolute inset-0 object-cover" />
 
       </div>
     </div>
+    </div>
+    <ResponsiveSignupPage/>
+    </div>
   )
 }
-
